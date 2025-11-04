@@ -8,7 +8,7 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); 
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, 
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -173,5 +173,77 @@ router.patch('/:id', upload.single('foto'), async (req, res) => {
     conn.release();
   }
 });
+// GET /api/workers/:id → obtener información completa de un trabajador
+router.get('/:id', async (req, res) => {
+  try {
+    const workerId = req.params.id;
+
+    // Obtener datos del trabajador con su área
+    const [workerRows] = await db.execute(`
+      SELECT 
+        t.id,
+        t.dni,
+        t.nombres,
+        t.apellidos,
+        t.email,
+        t.foto,
+        t.estado,
+        a.nombre_area AS area
+      FROM trabajadores t
+      INNER JOIN areas a ON t.id_area = a.id
+      WHERE t.id = ?
+    `, [workerId]);
+
+    if (workerRows.length === 0) {
+      return res.status(404).json({ error: 'Trabajador no encontrado' });
+    }
+
+    const worker = workerRows[0];
+
+    // Obtener horario asignado (si existe)
+    const [horarioRows] = await db.execute(`
+  SELECT 
+    h.hora_entrada,
+    h.hora_salida,
+    h.dias_laborales,
+    h.nombre_turno
+  FROM horarios h
+  INNER JOIN trabajadores t ON t.id_horario = h.id
+  WHERE t.id = ?
+  LIMIT 1
+`, [workerId]);
+
+    const horario = horarioRows[0] || null;
+
+    // Obtener las 5 últimas asistencias
+    const [asistenciasRows] = await db.execute(`
+   SELECT 
+    fecha,
+    hora_entrada,
+    hora_salida,
+    estado_entrada,   
+    estado_salida     
+  FROM registros_asistencia
+  WHERE trabajador_id = ?
+  ORDER BY fecha DESC
+  LIMIT 5
+`, [workerId]);
+
+    res.json({
+      worker: {
+        ...worker,
+        horaEntrada: horario?.hora_entrada || null,
+        horaSalida: horario?.hora_salida || null,
+        diasLaborales: horario?.dias_laborales || null,
+        nombreTurno: horario?.nombre_turno || null,
+      },
+      asistencias: asistenciasRows,
+    });
+  } catch (error) {
+    console.error('Error en GET /api/workers/:id:', error);
+    res.status(500).json({ error: 'Error al obtener datos del trabajador' });
+  }
+});
+
 
 module.exports = router;

@@ -3,12 +3,14 @@ const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
 
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const workerRoutes = require('./routes/workerRoutes');
 const asistenciaRoutes = require('./routes/asistenciaRoutes');
 const rolesRoutes = require('./routes/rolesRoutes');
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const asignacionHorariosRoutes = require('./routes/asignacionHorariosRoutes');
 const horarioRoutes = require('./routes/horarioRoutes');
+const reporteRoutes = require('./routes/reporteRoutes');
 
 
 const app = express();
@@ -37,12 +39,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
 // Rutas
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/asistencia', asistenciaRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/asignacion-horarios', asignacionHorariosRoutes);
 app.use('/api/horarios', horarioRoutes);
+app.use('/api/reportes', reporteRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API de Control de Asistencia - Activa' });

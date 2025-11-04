@@ -1,23 +1,66 @@
+// frontend/src/components/workers/WorkerCard.jsx
 import React from 'react';
 import { Card, Container, Button, Image, Row, Col } from 'react-bootstrap';
-import { FaPrint, FaEnvelope, FaArrowLeft } from 'react-icons/fa';
+import { FaDownload, FaEnvelope, FaArrowLeft } from 'react-icons/fa';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
-export default function WorkerCard({ worker, onPrint, onEmail, onBack }) {
+export default function WorkerCard({ worker, onEmail, onBack }) {
+  // 🧠 Convierte imagen a Base64 (sin tocar el servidor)
+  const toDataURL = (url) => {
+    return fetch(url)
+      .then((response) => response.blob())
+      .then(
+        (blob) =>
+          new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          })
+      );
+  };
+
+  // 📄 Generar PDF con html2canvas + jsPDF
+  const handleDownload = async () => {
+    const carnet = document.getElementById('carnet');
+
+    // Reemplazar imagen por Base64 antes de capturar
+    const img = carnet.querySelector('.worker-photo');
+    if (img && img.src.startsWith('http')) {
+      const base64 = await toDataURL(img.src);
+      img.src = base64;
+    }
+
+    // Convertir el carnet a imagen y luego a PDF
+    const canvas = await html2canvas(carnet, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = 80;
+    const pdfHeight = 120;
+
+    pdf.addImage(imgData, 'PNG', (210 - pdfWidth) / 2, 30, pdfWidth, pdfHeight);
+    pdf.save(`${worker.nombres}_${worker.apellidos}_Carnet.pdf`);
+  };
+
   return (
     <Container
-      className="d-flex flex-column justify-content-center align-items-center worker-card print-only"
+      className="d-flex flex-column justify-content-center align-items-center worker-card"
       style={{ minHeight: '90vh' }}
     >
-
-
       {/* Tarjeta del carnet */}
       <Card
+        id="carnet"
         className="shadow-lg border-0 rounded-4 d-flex flex-column align-items-center"
         style={{
           width: '370px',
           height: '560px',
           background: 'linear-gradient(180deg, #0d9dfdff 30%, #f8f2f2ff 30%)',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         {/* Encabezado */}
@@ -25,7 +68,7 @@ export default function WorkerCard({ worker, onPrint, onEmail, onBack }) {
           className="text-center text-white py-2 fw-bold w-100"
           style={{
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            letterSpacing: '1px'
+            letterSpacing: '1px',
           }}
         >
           CONTROL DE ASISTENCIA
@@ -43,10 +86,10 @@ export default function WorkerCard({ worker, onPrint, onEmail, onBack }) {
             alt="Foto del trabajador"
             width={130}
             height={130}
-            className="border border-3 border-white shadow-sm mt-3"
+            className="worker-photo border border-3 border-white shadow-sm mt-3"
             style={{
               objectFit: 'cover',
-              borderRadius: '10px'
+              borderRadius: '10px',
             }}
             onError={(e) =>
               (e.target.src = 'https://via.placeholder.com/130?text=Foto')
@@ -72,7 +115,7 @@ export default function WorkerCard({ worker, onPrint, onEmail, onBack }) {
             style={{
               width: '190px',
               height: '190px',
-              boxShadow: '0 0 6px rgba(0,0,0,0.1)'
+              boxShadow: '0 0 6px rgba(0,0,0,0.1)',
             }}
           >
             <Image
@@ -84,21 +127,30 @@ export default function WorkerCard({ worker, onPrint, onEmail, onBack }) {
             />
           </div>
 
-          <small className="text-muted mt-3 d-block" style={{ fontSize: '0.85rem' }}>
+          <small
+            className="text-muted mt-3 d-block"
+            style={{ fontSize: '0.85rem' }}
+          >
             Escanee este código para registrar su asistencia
           </small>
         </Card.Body>
       </Card>
 
-      {/* Botones de acción fuera del carnet */}
+      {/* Botones de acción */}
       <Row className="mt-4 text-center">
         <Col>
           <Button variant="secondary" className="mx-2 px-3" onClick={onBack}>
             <FaArrowLeft className="me-1" /> Volver
           </Button>
-          <Button variant="outline-primary" size="sm" onClick={() => window.print()}>
-            <FaPrint /> Imprimir
+
+          <Button
+            variant="outline-primary"
+            className="mx-2 px-3"
+            onClick={handleDownload}
+          >
+            <FaDownload className="me-1" /> Descargar Carnet
           </Button>
+
           <Button variant="success" className="mx-2 px-3" onClick={onEmail}>
             <FaEnvelope className="me-1" /> Enviar Correo
           </Button>
