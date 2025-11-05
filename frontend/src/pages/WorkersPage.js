@@ -316,9 +316,8 @@ export default function WorkersPage() {
                                     : '0 2px 4px rgba(0,0,0,0.1)',
                                   transition: 'all 0.3s ease'
                                 }}
-                                onClick={() =>
-                                  navigate('/asignacion-horarios', { state: { trabajador: worker } })
-                                }
+                                onClick={() => navigate(`/asignacion-horarios/${worker.id}`)}
+
                               >
                                 🕓 Horario
                               </Button>

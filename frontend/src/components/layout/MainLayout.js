@@ -1,22 +1,30 @@
 import React from "react";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
 
-export default function MainLayout({ children }) {
+export default function MainLayout() {
   return (
     <div className="d-flex">
-      {/* Sidebar fijo a la izquierda */}
+      {/* Sidebar fijo */}
       <Sidebar />
 
-      {/* Contenido principal */}
-      <main
-        className="flex-grow-1 bg-light p-4"
+      {/* Contenedor principal */}
+      <div
+        className="flex-grow-1 bg-light"
         style={{
           marginLeft: "250px", // espacio igual al ancho del sidebar
           minHeight: "100vh",
         }}
       >
-        {children}
-      </main>
+        {/* Navbar fijo arriba */}
+        <Navbar />
+
+        {/* Contenido principal debajo del navbar */}
+        <main style={{ paddingTop: "80px", padding: "65px" }}>
+          <Outlet /> {/* Aquí se renderizan las subrutas */}
+        </main>
+      </div>
     </div>
   );
 }

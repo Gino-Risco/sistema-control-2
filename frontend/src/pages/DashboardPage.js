@@ -1,17 +1,15 @@
 // frontend/src/pages/DashboardPage.js
-import React, { useState, useEffect } from 'react';
-import { Badge } from 'react-bootstrap';
-
-import { Container, Row, Col, Card, Spinner, Table } from 'react-bootstrap';
-import { 
-  FaUsers, 
-  FaClock, 
-  FaCheckCircle, 
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Card, Spinner, Table, Badge } from "react-bootstrap";
+import {
+  FaUsers,
+  FaClock,
+  FaCheckCircle,
   FaExclamationTriangle,
   FaBuilding,
-  FaChartLine
-} from 'react-icons/fa';
-import Chart from 'react-apexcharts';
+  FaChartLine,
+} from "react-icons/fa";
+import Chart from "react-apexcharts";
 
 export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -24,17 +22,13 @@ export default function DashboardPage() {
     const cargarDashboard = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/dashboard');
-        
-        if (!response.ok) {
-          throw new Error('Error al cargar los datos del dashboard');
-        }
-        
+        const response = await fetch("http://localhost:5000/api/dashboard");
+        if (!response.ok) throw new Error("Error al cargar los datos del dashboard");
         const data = await response.json();
         setDashboardData(data);
         setAsistenciasHoy(data.asistencias_hoy || []);
       } catch (err) {
-        console.error('Error:', err);
+        console.error("Error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -118,7 +112,7 @@ export default function DashboardPage() {
             <FaChartLine className="text-primary" style={{ fontSize: '2rem' }} />
           </div>
           <div>
-            <h2 className="mb-0 fw-bold text-dark">📊 Dashboard</h2>
+            <h2 className="mb-0 fw-bold text-dark"> Dashboard</h2>
             <p className="mb-0 text-muted">Resumen en tiempo real del sistema de asistencia</p>
           </div>
         </div>

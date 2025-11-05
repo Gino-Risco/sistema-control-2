@@ -1,66 +1,85 @@
 // frontend/src/App.js
-import React, { useEffect } from 'react';
-import { Container } from 'react-bootstrap';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import './App.css';
-import Sidebar from './components/layout/Sidebar';
-import Navbar from './components/layout/Navbar';
-import UsuariosPage from './pages/UsuariosPage';
-import AsignacionHorariosPage from './pages/AsignacionHorariosPage';
-import DashboardPage from './pages/DashboardPage';
-import WorkersPage from './pages/WorkersPage';
-import AsistenciasPage from './pages/AsistenciasPage';
-import AreasPage from './pages/AreasPage';
-import ReportsPage from './pages/ReportsPage';
-import PerfilTrabajadorPage from "./pages/PerfilTrabajadorPage";
-import ConfiguracionPage from './pages/ConfiguracionPage';
-import ConfiguracionHorariosPage from './pages/configuracion/ConfiguracionHorariosPage';
-import ConfiguracionTemaPage from './pages/configuracion/ConfiguracionTemaPage';
 
+// Páginas
+import AreasPage from './pages/AreasPage';
+import AsignacionHorariosPage from './pages/AsignacionHorariosPage';
+import AsistenciasPage from './pages/AsistenciasPage';
+import ConfiguracionPage from './pages/ConfiguracionPage';
+import DashboardPage from './pages/DashboardPage';
+import HorariosPage from './pages/HorariosPage';
+import LoginPage from './pages/LoginPage';
+import PerfilTrabajadorPage from './pages/PerfilTrabajadorPage';
+import ReportsPage from './pages/ReportsPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
+import UsuariosPage from './pages/UsuariosPage';
+import WorkersPage from './pages/WorkersPage';
+
+
+// Componentes
+import ProtectedRoute from './components/ProtectedRoute';
+import MainLayout from './components/layout/MainLayout';
 
 function App() {
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
   return (
-    <div className="App">
-      <Sidebar />
+    <Routes>
+      {/* Rutas públicas */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-      <div
-        className="d-flex flex-column"
-        style={{
-          marginLeft: '250px',
-          height: '100vh',
-          overflow: 'hidden',
-        }}
-      >
-        <Navbar />
+      {/* Rutas Protegidas que usan MainLayout */}
+      <Route path="/" element={<MainLayout />}>
+        {/* La ruta raíz ahora redirige al dashboard si tienes permiso */}
+        <Route index element={
+          <ProtectedRoute allowedRoles={['Administrador']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="dashboard" element={
+          <ProtectedRoute allowedRoles={['Administrador']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="trabajadores" element={
+          <ProtectedRoute allowedRoles={['Administrador']}>
+            <WorkersPage />
+          </ProtectedRoute>
+        } />
+        <Route path="trabajadores/:id" element={
+          <ProtectedRoute allowedRoles={['Administrador']}>
+            <PerfilTrabajadorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="asistencias" element={
+          <ProtectedRoute allowedRoles={['Administrador', 'Supervisor', 'Trabajador']}>
+            <AsistenciasPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/asignacion-horarios/:id" element={
+          <ProtectedRoute allowedRoles={['Administrador', 'Supervisor']}>
+            <AsignacionHorariosPage />
+          </ProtectedRoute>
+        } />
+        <Route path="reportes" element={
+          <ProtectedRoute allowedRoles={['Administrador', 'Supervisor']}>
+            <ReportsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="usuarios" element={
+          <ProtectedRoute allowedRoles={['Administrador']}>
+            <UsuariosPage />
+          </ProtectedRoute>
+        } />
 
-        <Container
-          fluid
-          className="p-4 flex-grow-1 bg-light"
-          style={{ overflowY: 'auto', marginTop: '56px' }}
-        >
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/trabajadores" element={<WorkersPage />} />
-            <Route path="/trabajadores/:id" element={<PerfilTrabajadorPage />} />
-            <Route path="/asistencias" element={<AsistenciasPage />} />
-            <Route path="/asignacion-horarios" element={<AsignacionHorariosPage />} />
-            <Route path="/areas" element={<AreasPage />} />
-            <Route path="/reportes" element={<ReportsPage />} />
-            <Route path="/usuarios" element={<UsuariosPage />} />
-            <Route path="/trabajadores/:id" element={<PerfilTrabajadorPage />} />
-            <Route path="/configuracion" element={<ConfiguracionPage />} />
-            <Route path="/configuracion/horarios" element={<ConfiguracionHorariosPage />} />
-            <Route path="/configuracion/tema" element={<ConfiguracionTemaPage />} />
+        <Route path="areas" element={<AreasPage />} />
+        <Route path="configuracion" element={<ConfiguracionPage />} />
+        <Route path="horarios" element={<HorariosPage />} />
+      </Route>
 
-
-          </Routes>
-        </Container>
-      </div>
-    </div>
+      {/* Fallback */}
+      <Route path="*" element={<p>Página no encontrada</p>} />
+    </Routes>
   );
 }
 

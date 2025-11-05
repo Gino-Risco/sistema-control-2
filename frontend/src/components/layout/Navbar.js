@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Navbar as BootstrapNavbar,
   Container,
@@ -15,26 +15,19 @@ import {
   FaSun,
   FaCogs,
 } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Add useContext
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
+import { AuthContext } from "../../context/AuthContext"; // Import AuthContext
 
 export default function Navbar() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { auth, logout } = useContext(AuthContext); // Get auth and logout from AuthContext
   const [notifications, setNotifications] = useState([]);
   const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadUserData = () => {
-      const user =
-        JSON.parse(localStorage.getItem("currentUser")) || {
-          nombre: "Administrador",
-          rol: "Administrador",
-          avatar: null,
-        };
-      setCurrentUser(user);
-
       const savedTheme = localStorage.getItem("theme") || "light";
       setTheme(savedTheme);
       document.documentElement.setAttribute("data-theme", savedTheme);
@@ -68,8 +61,8 @@ export default function Navbar() {
     });
 
     if (result.isConfirmed) {
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("authToken");
+      // La función logout() del AuthContext ya se encarga de limpiar el localStorage ('token' y 'usuario')
+      logout(); // Usar la función logout del AuthContext
 
       navigate("/login");
 
@@ -238,20 +231,20 @@ export default function Navbar() {
                     fontSize: "0.8rem",
                   }}
                 >
-                  {currentUser?.nombre?.charAt(0)?.toUpperCase() || "A"}
+                  {auth.usuario?.usuario?.charAt(0)?.toUpperCase() || "A"}
                 </motion.div>
                 <div className="text-start">
                   <div
                     className="fw-semibold mb-0"
                     style={{ fontSize: "0.85rem" }}
                   >
-                    {currentUser?.nombre}
+                    {auth.usuario?.usuario} {/* Usar auth.usuario.usuario */}
                   </div>
                   <div
                     className="text-muted"
                     style={{ fontSize: "0.75rem" }}
                   >
-                    {currentUser?.rol}
+                    {auth.usuario?.rol} {/* Usar auth.usuario.rol */}
                   </div>
                 </div>
               </Dropdown.Toggle>
@@ -269,6 +262,7 @@ export default function Navbar() {
                   onClick={handleLogout}
                   className="d-flex align-items-center gap-2 text-danger"
                 >
+                  <FaSignOutAlt size={14} /> Cerrar Sesión
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

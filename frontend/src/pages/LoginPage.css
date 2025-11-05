@@ -1,0 +1,118 @@
+.login-page-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  /* Fondo azul noche con degradado */
+  background: linear-gradient(135deg, #090952, #030372, rgb(13, 106, 146));
+}
+
+/* Branding lateral */
+.login-branding-col {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .login-branding-col {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    text-align: center;
+    flex: 1;
+  }
+  .login-branding-col h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  }
+  .login-branding-col p {
+    font-size: 1.2rem;
+  }
+}
+
+/* Tarjeta flotante del formulario */
+.login-form-wrapper {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255,255,255,0.95);
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.login-form-wrapper:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+}
+
+/* Inputs */
+.login-input {
+  padding-left: 45px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  height: 50px;
+  transition: all 0.3s ease;
+}
+
+.login-input:focus {
+  border-color: #3261b9;
+  box-shadow: 0 0 0 4px rgba(30,60,114,0.2);
+}
+
+/* Iconos */
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.2rem;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 1.2rem;
+}
+
+/* Botón */
+.login-button {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* Links */
+.login-form-wrapper a {
+  color: #1e3c72;
+  transition: color 0.3s ease;
+}
+
+.login-form-wrapper a:hover {
+  text-decoration: underline;
+}

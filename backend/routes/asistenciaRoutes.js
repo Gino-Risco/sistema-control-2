@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const jwt = require('jsonwebtoken');
 
 // POST /api/asistencia → registrar asistencia (QR)
 router.post('/', async (req, res) => {
@@ -166,6 +167,27 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   const { fecha_inicio, fecha_fin, dni } = req.query;
 
+  // Decodificar el token para obtener el rol y el ID del usuario
+  const token = req.headers.authorization?.split(' ')[1];
+  let decodedToken;
+  try {
+    if (!token) {
+      return res.status(401).json({ error: 'No autorizado: Token no proporcionado' });
+    }
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({ error: 'No autorizado: Token inválido' });
+  }
+
+  const { id: userId, rol: userRole } = decodedToken;
+
+  // Si el rol es Trabajador, forzamos la búsqueda solo para su ID
+  if (userRole === 'Trabajador') {
+    if (!userId) {
+      return res.status(400).json({ error: 'ID de trabajador no encontrado en el token' });
+    }
+  }
+
   try {
     let sql = `
       SELECT 
@@ -195,9 +217,14 @@ router.get('/', async (req, res) => {
       sql += ' AND r.fecha <= ?';
       params.push(fecha_fin);
     }
-    if (dni) {
+    // El filtro por DNI solo aplica para Admin y Supervisor
+    if (dni && (userRole === 'Administrador' || userRole === 'Supervisor')) {
       sql += ' AND t.dni LIKE ?';
       params.push(`%${dni}%`);
+    } else if (userRole === 'Trabajador') {
+      // Si es trabajador, filtramos por su ID de usuario
+      sql += ' AND r.trabajador_id = ?';
+      params.push(userId);
     }
 
     sql += ' ORDER BY r.fecha DESC, r.hora_entrada DESC';

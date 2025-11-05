@@ -10,9 +10,39 @@ import {
   FaCogs,
   FaSignOutAlt,
 } from "react-icons/fa";
+import { useContext } from "react"; // Importar useContext
+import { useNavigate } from "react-router-dom"; // Importar useNavigate
 import { motion } from "framer-motion";
+import { AuthContext } from "../../context/AuthContext"; // Importar AuthContext
 
 export default function Sidebar() {
+  const { userRole, logout } = useContext(AuthContext); // Obtener userRole y logout del AuthContext
+  const navigate = useNavigate(); // Obtener el hook navigate
+
+  const handleLogoutClick = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Definimos aquí qué enlaces puede ver cada rol
+  const navLinks = [
+    { to: "/", icon: <FaHome />, label: "Dashboard", allowedRoles: ["Administrador"] },
+    { to: "/trabajadores", icon: <FaUsers />, label: "Trabajadores", allowedRoles: ["Administrador"] },
+    { to: "/asistencias", icon: <FaCalendarCheck />, label: "Asistencias", allowedRoles: ["Administrador", "Supervisor", "Trabajador"] },
+    { to: "/areas", icon: <FaBuilding />, label: "Áreas", allowedRoles: ["Administrador"] },
+    { to: "/reportes", icon: <FaChartLine />, label: "Reportes", allowedRoles: ["Administrador", "Supervisor"] },
+    { to: "/usuarios", icon: <FaUsers />, label: "Usuarios", allowedRoles: ["Administrador"] },
+    { to: "/configuracion", icon: <FaCogs />, label: "Configuración", allowedRoles: ["Administrador"] },
+  ];
+
+  const filteredNavLinks = navLinks.filter(link => 
+    userRole && link.allowedRoles.includes(userRole)
+  );
+
+  const allUserLinks = [
+    ...filteredNavLinks,
+  ];
+
   return (
     <motion.div
       initial={{ x: -250 }}
@@ -50,44 +80,18 @@ export default function Sidebar() {
 
       {/* Menú lateral */}
       <Nav className="flex-column">
-        <SidebarLink to="/" icon={<FaHome />} label="Dashboard" delay={0.1} />
-        <SidebarLink
-          to="/trabajadores"
-          icon={<FaUsers />}
-          label="Trabajadores"
-          delay={0.2}
-        />
-        <SidebarLink
-          to="/asistencias"
-          icon={<FaCalendarCheck />}
-          label="Asistencias"
-          delay={0.3}
-        />
-        <SidebarLink to="/areas" icon={<FaBuilding />} label="Áreas" delay={0.4} />
-        <SidebarLink
-          to="/reportes"
-          icon={<FaChartLine />}
-          label="Reportes"
-          delay={0.5}
-        />
-        <SidebarLink
-          to="/usuarios"
-          icon={<FaUsers />}
-          label="Usuarios"
-          delay={0.6}
-        />
-        <SidebarLink
-          to="/configuracion"
-          icon={<FaCogs />}
-          label="Configuración"
-          delay={0.7}
-        />
+        {allUserLinks.map((link, index) => (
+          <SidebarLink key={index} to={link.to} icon={link.icon} label={link.label} delay={(index + 1) * 0.1} />
+        ))}
+
         <hr className="text-secondary" />
+
         <SidebarLink
           to="#"
           icon={<FaSignOutAlt />}
           label="Cerrar sesión"
           textColor="text-danger"
+          onClick={handleLogoutClick} // Pasar el manejador de clic
           delay={0.8}
         />
       </Nav>
@@ -95,7 +99,7 @@ export default function Sidebar() {
   );
 }
 
-function SidebarLink({ to, icon, label, textColor = "text-light", delay = 0 }) {
+function SidebarLink({ to, icon, label, textColor = "text-light", delay = 0, onClick }) { // Añadir prop onClick
   return (
     <motion.div
       whileHover={{ scale: 1.05, x: 5 }}
@@ -106,6 +110,7 @@ function SidebarLink({ to, icon, label, textColor = "text-light", delay = 0 }) {
       <Nav.Link
         as={NavLink}
         to={to}
+        onClick={onClick} // Pasar onClick a Nav.Link
         end
         className={`mb-2 d-flex align-items-center gap-3 px-3 py-2 rounded ${textColor}`}
         style={({ isActive }) => ({

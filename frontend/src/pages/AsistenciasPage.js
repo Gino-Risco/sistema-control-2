@@ -1,5 +1,4 @@
-// frontend/src/pages/AsistenciasPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Modal } from 'react-bootstrap';
 
 import {
@@ -12,6 +11,7 @@ import {
   Col,
   Spinner
 } from 'react-bootstrap';
+import { AuthContext } from '../context/AuthContext';
 
 export default function AsistenciasPage() {
   const [fechaInicio, setFechaInicio] = useState(() => {
@@ -27,6 +27,7 @@ export default function AsistenciasPage() {
   const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { userRole } = useContext(AuthContext);
 
   // Estados para el escaneo remoto
   const [showQrModal, setShowQrModal] = useState(false);
@@ -34,14 +35,17 @@ export default function AsistenciasPage() {
   const [scanningRemote, setScanningRemote] = useState(false);
 
   // Cargar asistencias
-  const fetchAsistencias = async () => {
+  const fetchAsistencias = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const url = new URL('http://localhost:5000/api/asistencia');
       if (fechaInicio) url.searchParams.append('fecha_inicio', fechaInicio);
       if (fechaFin) url.searchParams.append('fecha_fin', fechaFin);
-      if (dniBusqueda) url.searchParams.append('dni', dniBusqueda);
+      // Solo los administradores y supervisores pueden buscar por DNI
+      if (dniBusqueda && (userRole === 'Administrador' || userRole === 'Supervisor')) {
+        url.searchParams.append('dni', dniBusqueda);
+      }
 
       const response = await fetch(url);
       if (!response.ok) throw new Error('Error en la respuesta del servidor');
@@ -53,7 +57,7 @@ export default function AsistenciasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fechaInicio, fechaFin, dniBusqueda, userRole]);
 
   // Función para iniciar escaneo remoto
   const handleStartRemoteScan = async () => {
@@ -87,7 +91,7 @@ export default function AsistenciasPage() {
 
   useEffect(() => {
     fetchAsistencias();
-  }, []);
+  }, [fetchAsistencias]);
 
   // Renderiza un estado con su badge de Bootstrap
   const renderEstado = (estado) => {
@@ -151,17 +155,20 @@ export default function AsistenciasPage() {
                   />
                 </Form.Group>
               </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>Buscar por DNI</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Ej. 75123456"
-                    value={dniBusqueda}
-                    onChange={(e) => setDniBusqueda(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
+              {/* El filtro por DNI solo es visible para Admin y Supervisor */}
+              {(userRole === 'Administrador' || userRole === 'Supervisor') && (
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label>Buscar por DNI</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Ej. 75123456"
+                      value={dniBusqueda}
+                      onChange={(e) => setDniBusqueda(e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+              )}
               <Col md={3} className="d-flex align-items-end">
                 <Button variant="outline-primary" type="submit" className="me-2">
                   Filtrar
