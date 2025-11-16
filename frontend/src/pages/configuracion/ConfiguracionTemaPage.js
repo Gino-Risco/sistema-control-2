@@ -20,7 +20,7 @@ export default function ConfiguracionTemaPage() {
     };
 
     return (
-        <Container fluid className="py-4" style={{ paddingLeft: '100px', paddingRight: '40px' }}>
+        <Container fluid className="py-4" style={{ paddingLeft: '10px', paddingRight: '40px' }}>
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div className="d-flex align-items-center gap-3">
 

@@ -8,13 +8,19 @@ import AsignacionHorariosPage from './pages/AsignacionHorariosPage';
 import AsistenciasPage from './pages/AsistenciasPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 import DashboardPage from './pages/DashboardPage';
-import HorariosPage from './pages/HorariosPage';
+import HorariosPage from './pages/HorariosPagexd';
 import LoginPage from './pages/LoginPage';
 import PerfilTrabajadorPage from './pages/PerfilTrabajadorPage';
 import ReportsPage from './pages/ReportsPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import UsuariosPage from './pages/UsuariosPage';
 import WorkersPage from './pages/WorkersPage';
+import ConfiguracionHorariosPage from './pages/configuracion/ConfiguracionHorariosPage';
+import ConfiguracionTemaPage from './pages/configuracion/ConfiguracionTemaPage';
+
+
+
+
 
 
 // Componentes
@@ -71,9 +77,24 @@ function App() {
             <UsuariosPage />
           </ProtectedRoute>
         } />
+        <Route
+          path="configuracion/horarios"
+          element={
+            <ProtectedRoute allowedRoles={['Administrador']}>
+              <ConfiguracionHorariosPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="configuracion/tema" element={
+          <ProtectedRoute allowedRoles={['Administrador']}>
+            <ConfiguracionTemaPage />
+          </ProtectedRoute>
+        } />
 
         <Route path="areas" element={<AreasPage />} />
         <Route path="configuracion" element={<ConfiguracionPage />} />
+
         <Route path="horarios" element={<HorariosPage />} />
       </Route>
 

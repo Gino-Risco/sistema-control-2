@@ -30,14 +30,22 @@ export default function WorkersPage() {
   // Feedback visual
   const [highlightedWorkerId, setHighlightedWorkerId] = useState(null);
 
-  // Detectar si venimos de asignar horario
   useEffect(() => {
-    if (location.state?.trabajadorIdAsignado) {
-      setHighlightedWorkerId(location.state.trabajadorIdAsignado);
-      const timer = setTimeout(() => setHighlightedWorkerId(null), 2500);
-      return () => clearTimeout(timer);
+    const fromNavigation = location.state?.trabajadorIdAsignado;
+    const fromStorage = sessionStorage.getItem('recentlyAssignedWorkerId');
+    const idToHighlight = fromNavigation || fromStorage;
+
+    if (idToHighlight) {
+      setHighlightedWorkerId(idToHighlight);
+
+      if (fromNavigation) {
+        const timer = setTimeout(() => {
+          setHighlightedWorkerId(null);
+        }, 2500);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [location.state]);
+  }, [location]);
 
   const loadWorkers = async () => {
     try {

@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Button } from 'react-bootstrap';
-import Sidebar from './Sidebar'; // Asumo que tienes un componente Sidebar
+import Sidebar from './Sidebar'; 
 import { AuthContext } from '../context/AuthContext';
 
 const Layout = () => {
@@ -16,7 +16,6 @@ const Layout = () => {
 
   return (
     <div className="d-flex">
-      {/* Asumo que tu Sidebar está en src/components/Sidebar.js */}
       <Sidebar /> 
       
       <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -38,7 +37,6 @@ const Layout = () => {
         </Navbar>
 
         <main className="flex-grow-1" style={{ backgroundColor: '#f4f6f9' }}>
-          {/* Aquí se renderizará el contenido de cada página (Dashboard, Asistencias, etc.) */}
           <Outlet />
         </main>
       </div>

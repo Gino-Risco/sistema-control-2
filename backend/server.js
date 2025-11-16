@@ -10,15 +10,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 🔒 Configuración de CORS
+//  Configuración de CORS
 const corsOptions = {
-  origin: 'http://localhost:3000', // tu frontend
+  origin: 'http://localhost:3000', 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// 🧩 Middlewares globales
+// Middlewares globales
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -32,7 +32,7 @@ app.use(
 // Servir imágenes con cabeceras CORS
 app.use('/uploads', express.static('uploads'));
 
-// 🔗 Importar rutas
+//  Importar rutas
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const workerRoutes = require('./routes/workerRoutes');
@@ -43,7 +43,7 @@ const asignacionHorariosRoutes = require('./routes/asignacionHorariosRoutes');
 const horarioRoutes = require('./routes/horarioRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
 
-// 🛣️ Usar rutas
+//  Usar rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/workers', workerRoutes);

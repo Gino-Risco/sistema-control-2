@@ -262,7 +262,6 @@ export default function Navbar() {
                   onClick={handleLogout}
                   className="d-flex align-items-center gap-2 text-danger"
                 >
-                  <FaSignOutAlt size={14} /> Cerrar Sesión
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

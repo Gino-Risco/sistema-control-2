@@ -13,7 +13,7 @@ export default function MainLayout() {
       <div
         className="flex-grow-1 bg-light"
         style={{
-          marginLeft: "250px", // espacio igual al ancho del sidebar
+          marginLeft: "250px", 
           minHeight: "100vh",
         }}
       >
@@ -22,7 +22,7 @@ export default function MainLayout() {
 
         {/* Contenido principal debajo del navbar */}
         <main style={{ paddingTop: "80px", padding: "65px" }}>
-          <Outlet /> {/* Aquí se renderizan las subrutas */}
+          <Outlet /> 
         </main>
       </div>
     </div>

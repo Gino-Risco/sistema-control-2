@@ -26,7 +26,7 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     last_scan_time = 0
-    cooldown = 3  # segundos de espera entre escaneos
+    cooldown = 3  
 
     while True:
         ret, frame = cap.read()

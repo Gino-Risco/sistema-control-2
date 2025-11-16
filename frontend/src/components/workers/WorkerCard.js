@@ -6,7 +6,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export default function WorkerCard({ worker, onEmail, onBack }) {
-  // 🧠 Convierte imagen a Base64 (sin tocar el servidor)
+  //  Convierte imagen a Base64 
   const toDataURL = (url) => {
     return fetch(url)
       .then((response) => response.blob())
@@ -21,7 +21,7 @@ export default function WorkerCard({ worker, onEmail, onBack }) {
       );
   };
 
-  // 📄 Generar PDF con html2canvas + jsPDF
+  //  Generar PDF con html2canvas + jsPDF
   const handleDownload = async () => {
     const carnet = document.getElementById('carnet');
 
@@ -46,6 +46,7 @@ export default function WorkerCard({ worker, onEmail, onBack }) {
     pdf.addImage(imgData, 'PNG', (210 - pdfWidth) / 2, 30, pdfWidth, pdfHeight);
     pdf.save(`${worker.nombres}_${worker.apellidos}_Carnet.pdf`);
   };
+  
 
   return (
     <Container
@@ -59,7 +60,7 @@ export default function WorkerCard({ worker, onEmail, onBack }) {
         style={{
           width: '370px',
           height: '560px',
-          background: 'linear-gradient(180deg, #0d9dfdff 30%, #f8f2f2ff 30%)',
+          background: 'linear-gradient(180deg, #0d7ae7ff 30%, #f8f2f2ff 30%)',
           overflow: 'hidden',
         }}
       >
@@ -67,11 +68,11 @@ export default function WorkerCard({ worker, onEmail, onBack }) {
         <div
           className="text-center text-white py-2 fw-bold w-100"
           style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            backgroundColor: 'rgba(19, 18, 18, 0.1)',
             letterSpacing: '1px',
           }}
         >
-          CONTROL DE ASISTENCIA
+          CONTROL DE ASISTENCIA 
         </div>
 
         {/* Contenido del carnet */}

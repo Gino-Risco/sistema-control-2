@@ -70,8 +70,8 @@ export default function Sidebar() {
         <Image
           src="/images/logo.png"
           roundedCircle
-          width="80"
-          height="80"
+          width="90"
+          height="90"
           alt="Logo"
           className="shadow-sm"
         />

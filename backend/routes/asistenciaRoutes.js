@@ -187,26 +187,32 @@ router.get('/', async (req, res) => {
       return res.status(400).json({ error: 'ID de trabajador no encontrado en el token' });
     }
   }
-
   try {
+    //  PARÁMETROS DE PAGINACIÓN
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
     let sql = `
-      SELECT 
-        r.id,
-        t.dni,
-        CONCAT(t.nombres, ' ', t.apellidos) AS nombre_completo,
-        h.nombre_turno AS horario,
-        r.fecha,
-        r.hora_entrada,
-        r.hora_salida,
-        r.minutos_tardanza,
-        r.estado_entrada,
-        r.estado_salida,
-        r.metodo_registro
-      FROM registros_asistencia r
-      INNER JOIN trabajadores t ON r.trabajador_id = t.id
-      LEFT JOIN horarios h ON t.id_horario = h.id
-      WHERE 1=1
-    `;
+    SELECT 
+      r.id,
+      t.dni,
+      CONCAT(t.nombres, ' ', t.apellidos) AS nombre_completo,
+      h.nombre_turno AS horario,
+      r.fecha,
+      r.hora_entrada,
+      r.hora_salida,
+      r.minutos_tardanza,
+      r.estado_entrada,
+      r.estado_salida,
+      r.metodo_registro,
+      h.hora_entrada AS hora_entrada_programada,
+      h.hora_salida AS hora_salida_programada
+    FROM registros_asistencia r
+    INNER JOIN trabajadores t ON r.trabajador_id = t.id
+    LEFT JOIN horarios h ON t.id_horario = h.id
+    WHERE 1=1
+  `;
     const params = [];
 
     if (fecha_inicio) {
@@ -217,20 +223,69 @@ router.get('/', async (req, res) => {
       sql += ' AND r.fecha <= ?';
       params.push(fecha_fin);
     }
-    // El filtro por DNI solo aplica para Admin y Supervisor
     if (dni && (userRole === 'Administrador' || userRole === 'Supervisor')) {
       sql += ' AND t.dni LIKE ?';
       params.push(`%${dni}%`);
     } else if (userRole === 'Trabajador') {
-      // Si es trabajador, filtramos por su ID de usuario
       sql += ' AND r.trabajador_id = ?';
       params.push(userId);
     }
 
-    sql += ' ORDER BY r.fecha DESC, r.hora_entrada DESC';
+    // 👇 Contar el total de registros (para totalPages)
+    const countSql = `
+    SELECT COUNT(*) AS total 
+    FROM registros_asistencia r
+    INNER JOIN trabajadores t ON r.trabajador_id = t.id
+    LEFT JOIN horarios h ON t.id_horario = h.id
+    WHERE 1=1
+    ${fecha_inicio ? ' AND r.fecha >= ?' : ''}
+    ${fecha_fin ? ' AND r.fecha <= ?' : ''}
+    ${dni && (userRole === 'Administrador' || userRole === 'Supervisor') ? ' AND t.dni LIKE ?' : ''}
+    ${userRole === 'Trabajador' ? ' AND r.trabajador_id = ?' : ''}
+  `;
 
-    const [rows] = await db.execute(sql, params);
-    res.json(rows);
+    const countParams = [
+      ...(fecha_inicio ? [fecha_inicio] : []),
+      ...(fecha_fin ? [fecha_fin] : []),
+      ...(dni && (userRole === 'Administrador' || userRole === 'Supervisor') ? [`%${dni}%`] : []),
+      ...(userRole === 'Trabajador' ? [userId] : [])
+    ];
+
+    const [countResult] = await db.execute(countSql, countParams);
+    const totalRecords = countResult[0].total;
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    // 👇 Aplicar paginación a la consulta principal
+    sql += ` ORDER BY r.fecha DESC, r.hora_entrada DESC LIMIT ? OFFSET ?`;
+    const queryParams = [...params, limit, offset];
+
+    const [rows] = await db.execute(sql, queryParams);
+
+    // Calcular minutos_diferencia_entrada
+    const registrosConDiferencia = rows.map(row => {
+      let minutos_diferencia_entrada = 0;
+      if (row.hora_entrada && row.hora_entrada_programada) {
+        try {
+          const [hReal, mReal] = row.hora_entrada.split(':').map(Number);
+          const [hProg, mProg] = row.hora_entrada_programada.split(':').map(Number);
+          minutos_diferencia_entrada = (hReal * 60 + mReal) - (hProg * 60 + mProg);
+        } catch (e) {
+          console.warn('Error parsing horas:', e);
+        }
+      }
+      return { ...row, minutos_diferencia_entrada };
+    });
+
+    // 👇 Responder con datos + paginación
+    res.json({
+      data: registrosConDiferencia,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalRecords,
+        perPage: limit
+      }
+    });
   } catch (error) {
     console.error('Error al obtener asistencias:', error);
     res.status(500).json({ error: 'Error al obtener asistencias' });
